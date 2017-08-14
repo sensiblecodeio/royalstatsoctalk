@@ -1,0 +1,241 @@
+
+https://events.rss.org.uk/rss/frontend/reg/titem.csp?pageID=46354&eventID=93&eventID=93
+
+----------------------
+
+Title: 	PD3: Data Manipulation, modelling and analysis with Pandas and Jupyter - an introduction
+Time: 	05/09/2017, 11:50 - 13:10
+Location: 	Executive Room B
+Type: 	Professional Development
+
+Pandas is an open source package that provides flexible and high-performance data manipulation, modelling, and analysis tools for Python. Jupyter (open source) is an interactive programming notebook, that is particularly useful when combined with Pandas for exploring data. We’ve put together a workshop which is designed to give people an introduction to these powerful tools. As well as giving some basic lessons we’ll introduce you to some open source libraries we’ve built and which help to get time series data out of large gnarly spreadsheets.
+
+Prerequisites: This workshop is suitable for people who use R, SAS or SPSS. If you wish to participate and try things out during the session we recommend that you bring your laptop with Jupyter and Pandas already installed. The best way to do this is to use Anaconda (a Python installer that bundles Jupyter and Pandas). Instructions here: https://docs.continuum.io/anaconda/install/
+
+Organised by The Sensible Code Company
+
+----------------------
+
+1. About me.  I am a programmer and pure mathematician who has ben using Python since 2004 to scrape data off the internet.  (eg MP's votes from Hansard).  I don't have any statistical training or experience.  I don't know SPSS, R or SAS and very little excel.  
+
+
+2. We only have an hour, but I'd like a bit of interaction so I can tell you things you want to know.  If you ask me something I don't know, I'll talk you through how I look for an answer, and maybe we'll both learn something.
+
+
+3. Road atlas diagram of Python with the interchanges and new stuff being built all the time
+
+[img]
+
+4. You've probably heard a lot of arguments about free open source vs proprietary paid for professional software.  My take is the programming language is like the highway system you use to drive your data between the different factories.  
+
+When someone goes to trouble of building a new factory, they'll choose to connect it to the public highway system than onto a spur of a private toll road.  
+
+Also, given that factory building is something that happens over time in the real world, the road network that connects them up will have a lot of history built into it, and won't always make sense.  
+
+
+5. Here's a webpage for StatsModels library.  
+   http://www.statsmodels.org/stable/about.html
+I'm going to use a function from it later.  But you can see they've explained the history on the front page.
+
+6. Here is the webpage for https://scipy.org/
+I'm not sure whether all these components are really part of it or not part of it, because you can get to them through a back road, not the main gate.  
+
+7. Here is a webpage about a library I wrote for the ONS for extracting data from their human readable spreadsheets
+    https://github.com/sensiblecodeio/databaker/blob/master/databaker/tutorial/Introduction.ipynb
+
+8. I'm going to spend as little time on Databaker as possible, but just enough to get some columns of numbers from a spreadsheet.
+
+
+9. Start with the data, from here:
+    https://www.ons.gov.uk/businessindustryandtrade/constructionindustry/datasets/outputintheconstructionindustry/current
+Excel spreadsheet:
+
+
+from databaker.framework import *
+tabs = loadxlstabs("constructiondata.xls")
+tab = tabs[6]
+print(tab.name)
+######
+savepreviewhtml(tab, "preview.html")
+
+Then:
+jan = tab.filter("Jan")
+jan = jan.by_index(1)
+pubhousing = jan.shift(RIGHT).expand(DOWN)
+prihousing = pubhousing.shift(RIGHT)
+
+######
+print(pubhousing)
+vpubhousing = [k.value  for k in pubhousing]
+vprihousing = [k.value  for k in prihousing]
+
+10. Quick show of matplotlib:
+
+from matplotlib import pyplot as plt
+%matplotlib inline
+
+plt.plot(vpubhousing, label="pub")
+plt.plot(vprihousing, label="pri")
+plt.legend()
+
+
+
+11. I could go straight onto pandas, but I think our time is better spend do something with this data than showing how to load it into different carts. 
+
+
+but if you really want to, here is how to build it into a time series.
+
+import pandas
+pandas.DataFrame([vpubhousing, vprihousing])
+d = pandas.DataFrame({"pub":vpubhousing, "pri":vprihousing})
+
+month = pubhousing.shift(LEFT)
+year = month.shift(LEFT)
+monthdates = [ ]
+for m, y in zip(month, year):
+    monthdates.append(m.value.strip()+" "+(str(y.value)[:4] if y.value else monthdates[-1][-4:]))
+
+datecol = pandas.to_datetime(monthdates)
+pandas.DataFrame([vpubhousing, vprihousing])
+d = pandas.DataFrame({"pub":vpubhousing, "pri":vprihousing})
+d = d.set_index(datecol)
+
+
+
+12. Let's do some basic stats.
+
+v = vprihousing
+
+import scipy
+scipy.stats.stats.tmean(v)
+scipy.stats.stats.tstd(v)
+
+make sure we can replicate the numbers output
+
+
+13.  Histogram.  Useful for looking at a set of numbers.  
+
+I thought I'd found it here:
+    help(scipy.stats.histogram)
+
+# look at it like this:
+import numpy as np
+a, b = np.histogram(v)
+plt.bar(b[:-1], a, width=100)
+
+# or do this:
+import pandas as pd
+pd.DataFrame(v).hist()
+
+# we should check it's we can tell it's not a normal distribution 
+scipy.stats.normaltest(v)
+
+
+
+14. Is that p-value bad?  
+
+You have a computer here.  Always run it with simulated data to see how things work.  The only reason people have not done it is the hassle.  Well, there's no hassle now.  
+
+######
+import random
+s = [ random.gauss(10,2)  for i in range(len(vprihousing)) ]
+pd.DataFrame(s).hist()
+scipy.stats.normaltest(s)
+
+It changes a lot
+
+So run a simulation of the simulation
+#######
+ps = [ ]
+for j in range(1000):
+    s = [ random.gauss(5,10)  for i in range(len(vprihousing)) ]
+    q = scipy.stats.normaltest(s, nan_policy='omit')
+    ps.append(q.pvalue)
+pd.DataFrame(ps).hist()
+
+ps.sort()
+plt.plot(ps)
+
+Comes out as uniform distribution.  Is this a fun fact?
+
+
+
+15. But back to this monthly construction data.  We know that taking a mean and a histogram of time-varying data is a bit silly.
+
+plt.plot(vprihousing)
+
+What should we be doing?  Notice how it has monthly cycles.  If we trim off the front 12 elements and plot it alongside
+
+plt.plot(vprihousing[12:])
+
+plt.plot(vprihousing[6:])  # out of correlation
+
+
+
+16. One trick to to pick up these cycles in the data is by autocorrelation, which is you shift it over by n values and multply it by itself.
+
+s = [ sum(x*y  for x, y in zip(v[a:], v))/(len(v)-a)  for a in range(20) ]
+plt.plot(s)
+
+A bit slopy, because there is a trend in the data.  But there are humps.  
+
+One trick I've seen to remove even it out is to take the ratio of each pair first
+ 
+v = [a/b  for a, b in zip(vprihousing[1:], vprihousing)]
+
+Now you can see the cycle at the 12 position.
+
+
+17. This leads onto the seasonal decomposition 
+import statsmodels.tsa.seasonal
+help(statsmodels.tsa.seasonal.seasonal_decompose)
+
+Notes: This is a naive decomposition. More sophisticated methods should be preferred.
+
+h = statsmodels.tsa.seasonal.seasonal_decompose(vprihousing, freq=12)
+
+# plot the decomposition
+plt.plot(h.resid)
+plt.plot(h.seasonal)
+plt.plot(h.trend)
+
+the nans (not a number) are place-holders so that they align.  Problem if it used zeros.
+
+Now we can plot the seasonal:
+   plt.plot(h.seasonal)
+   plt.plot(h.seasonal[12:])
+
+Now we can plot the residual and test its randomness
+   pd.DataFrame(h.resid).hist()
+   scipy.stats.normaltest(v)
+
+
+18. help(statsmodels.tsa) for making more sophisticated models, and looking at timeseries data.
+
+Here is how we'd download the file originally:
+
+furl = "https://www.ons.gov.uk/file?uri=/businessindustryandtrade"+\
+       "/constructionindustry/datasets/outputintheconstructionindustry"+\
+       "/current/previous/v26/constructionoutputmay2017correction.xls"
+        
+req = urllib.request.Request(furl, headers={'User-Agent' : "Sensible code"}) 
+xp = urllib.request.urlopen(req).read()
+fout = open("constructiondata.xls", "wb")
+fout.write(xp)
+fout.close()
+
+This gives us the power to totally automate the analysis from fetching the data each month and producing all the trend-lines and predictions:
+
+19. If you are being real scientists, you don't just observe, you have to predict.  
+
+Suppose the policy is to lift the trend on number of houses being built through a certain policy change, and the minister does something ideological like repealing half the building regulations in January.  
+
+We know what happens next.  In April they release the February results and the house building is up by 15 percent on January.  Success.  Policy is working.  The minister gets promoted, and no one wants to listen to the statisticians who have worked it out a day later.  
+
+Yes, I know they publish seasonably adjusted data, but even in that there is noise.  
+
+What the statistician should do is move the goalposts and predict the figures for next month's statistics in advance in order to state what number would signify a difference that may be due to a change in policy, so it doesn't look like you're making excuses up later.
+
+But this is high sophistication and value.  But you use fast working techniques and automation in order to get there before you run out of time and provide nothing more than a plain graph.  
+
+
