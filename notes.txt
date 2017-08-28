@@ -1,6 +1,9 @@
 
 https://events.rss.org.uk/rss/frontend/reg/titem.csp?pageID=46354&eventID=93&eventID=93
 
+also examples of outputs
+http://seaborn.pydata.org/examples/index.html
+
 ----------------------
 
 Title: 	PD3: Data Manipulation, modelling and analysis with Pandas and Jupyter - an introduction
