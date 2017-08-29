@@ -19,6 +19,7 @@ Organised by The Sensible Code Company
 
 ----------------------
 
+
 1. About me.  I am a programmer and pure mathematician who has ben using Python since 2004 to scrape data off the internet.  (eg MP's votes from Hansard).  I don't have any statistical training or experience.  I don't know SPSS, R or SAS and very little excel.  
 
 
@@ -28,6 +29,19 @@ Organised by The Sensible Code Company
 3. Road atlas diagram of Python with the interchanges and new stuff being built all the time
 
 [img]
+
+Fire triangle
+Show python as a command line
+Show python as a script
+Jupyter is a third way
+show the source of a code file there
+github can render it.  
+
+oh, the idea that if we have 10 numbers to do stats with, no point in setting up a database or making things complicated.  Now this applies to 10million.  Your idea of what small data is has to change.  (Big data is a solution looking for a problem)
+
+
+
+
 
 4. You've probably heard a lot of arguments about free open source vs proprietary paid for professional software.  My take is the programming language is like the highway system you use to drive your data between the different factories.  
 
