@@ -4,6 +4,11 @@ https://events.rss.org.uk/rss/frontend/reg/titem.csp?pageID=46354&eventID=93&eve
 also examples of outputs
 http://seaborn.pydata.org/examples/index.html
 
+instructions here
+https://github.com/sensiblecodeio/databaker/tree/master/databaker/tutorial
+
+
+
 ----------------------
 
 Title: 	PD3: Data Manipulation, modelling and analysis with Pandas and Jupyter - an introduction
@@ -29,18 +34,33 @@ Organised by The Sensible Code Company
 3. Road atlas diagram of Python with the interchanges and new stuff being built all the time
 
 [img]
+### process the image to make it clearer(?)
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+k = mpimg.imread("roadmap.jpg")
+kl = k[:,:,0]
+plt.hist(kl.ravel(), bins=256);
+
+kh = k.copy()
+kh[kh[:,:,0]>170] = 255
+plt.figure(figsize=(20,18))
+plt.imshow(kh)
+
 
 Fire triangle
-Show python as a command line
-Show python as a script
-Jupyter is a third way
+** Show python as a command line
+** Show python as a script
+
+** Jupyter is a third way
 show the source of a code file there
 github can render it.  
 
 oh, the idea that if we have 10 numbers to do stats with, no point in setting up a database or making things complicated.  Now this applies to 10million.  Your idea of what small data is has to change.  (Big data is a solution looking for a problem)
 
-
-
+Whole books made in it:
+    https://github.com/jakevdp/PythonDataScienceHandbook/tree/master/notebooks
 
 
 4. You've probably heard a lot of arguments about free open source vs proprietary paid for professional software.  My take is the programming language is like the highway system you use to drive your data between the different factories.  
@@ -48,6 +68,7 @@ oh, the idea that if we have 10 numbers to do stats with, no point in setting up
 When someone goes to trouble of building a new factory, they'll choose to connect it to the public highway system than onto a spur of a private toll road.  
 
 Also, given that factory building is something that happens over time in the real world, the road network that connects them up will have a lot of history built into it, and won't always make sense.  
+
 
 
 5. Here's a webpage for StatsModels library.  
@@ -147,11 +168,12 @@ pd.DataFrame(v).hist()
 # we should check it's we can tell it's not a normal distribution 
 scipy.stats.normaltest(v)
 
-
+# learn about p-values here: https://xkcd.com/882/
 
 14. Is that p-value bad?  
 
 You have a computer here.  Always run it with simulated data to see how things work.  The only reason people have not done it is the hassle.  Well, there's no hassle now.  
+
 
 ######
 import random
